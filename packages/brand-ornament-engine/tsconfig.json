@@ -1,0 +1,11 @@
+// packages/brand-ornament-engine/tsconfig.json
+
+{
+  "extends": "@purhami/typescript-config/react-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": "."
+  },
+  "include": ["src/**/*"]
+}

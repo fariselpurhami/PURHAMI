@@ -1,0 +1,66 @@
+/* apps/web/src/styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --header-height: 80px;
+    --font-heading: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+  }
+
+  body {
+    @apply bg-porcelain text-obsidian font-sans antialiased;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-oxblood ring-offset-2 ring-offset-porcelain;
+  }
+}
+
+@layer utilities {
+  .ease-couture {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ease-tension {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .ease-editorial {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .reveal-mask {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+  }
+  .reveal-mask-hidden {
+    clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%);
+  }
+}
+
+@keyframes draw-vein {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-draw-vein {
+  animation-name: draw-vein;
+  animation-duration: 3s;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-draw-vein {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .reveal-mask-hidden {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%) !important;
+    opacity: 0;
+  }
+  .reveal-mask {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+}

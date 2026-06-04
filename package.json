@@ -1,0 +1,38 @@
+{
+  "name": "purhami-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:smoke": "turbo run test:smoke",
+    "test:e2e": "turbo run test:e2e",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "prettier": "^3.2.5",
+    "eslint": "^8.56.0",
+    "@purhami/prettier-config": "workspace:*",
+    "typescript": "^5.4.0",
+    "vitest": "^1.2.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "pnpm": {
+    "overrides": {
+      "next": "14.2.33",
+      "eslint-config-next": "14.2.33"
+    },
+    "supportedArchitectures": {
+      "os": ["darwin", "linux", "win32"],
+      "cpu": ["x64", "arm64"]
+    }
+  }
+}

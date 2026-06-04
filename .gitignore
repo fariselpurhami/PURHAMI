@@ -1,0 +1,16 @@
+# .gitignore
+
+node_modules
+.pnp
+.pnp.js
+coverage
+.next/
+out/
+build
+dist
+.vercel
+*.pem
+.env*.local
+.env
+.DS_Store
+*.log

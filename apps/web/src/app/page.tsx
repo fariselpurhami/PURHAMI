@@ -1,55 +1,58 @@
-// apps/web/src/app/page.tsx
+'use client';
+
 import React from 'react';
-import { OrnamentLayer } from '@purhami/brand-ornament-engine';
-import { CinematicReveal } from '~/components/layout/CinematicReveal';
+import { ArrowRight } from 'lucide-react';
+import { WebGLBloodline } from '../components/brand-ornament/WebGLBloodline';
+import { MagneticCursor } from '../components/kinematics/MagneticCursor';
+import { CinematicCard } from '../components/commerce/CinematicCard';
+import { HUD } from '../components/layout/HUD';
+import { MonumentalFooter } from '../components/layout/MonumentalFooter';
+import { useKinematicScroll } from '../hooks/use-kinematic-scroll';
+import { CatalogSeed } from '../lib/seed-data';
 
-export default function Home() {
+export default function FlagshipStorefront() {
+  const { containerRef, velocity } = useKinematicScroll();
+
   return (
-    <div className="relative min-h-screen w-full bg-porcelain flex flex-col items-center overflow-x-hidden">
+    <div className="relative min-h-screen bg-obsidian text-ivory font-sans selection:bg-bloodline selection:text-ivory overflow-hidden">
       
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-20">
-         <OrnamentLayer seed={101} color="var(--oxblood, #4A0E17)" />
-      </div>
+      <MagneticCursor />
+      <WebGLBloodline />
+      <HUD />
 
-      <section className="relative z-10 w-full min-h-[90vh] flex flex-col items-center justify-center px-6 text-center">
-        
-        <CinematicReveal delay={100}>
-          <span className="text-oxblood uppercase tracking-[0.2em] text-xs font-semibold mb-8 block">
-            The Digital Flagship
-          </span>
-        </CinematicReveal>
-
-        <CinematicReveal delay={300}>
-          <h1 className="font-heading text-[clamp(3rem,10vw,8rem)] leading-[0.95] tracking-tight text-obsidian text-balance max-w-6xl mx-auto">
-            Power. Vision.<br />Precision.
+      {/* الـ Container المتحرك ديناميكياً باستخدام Kinematics */}
+      <div 
+        ref={containerRef} 
+        className="fixed top-0 left-0 w-full will-change-transform z-10"
+      >
+        <section className="relative w-full h-screen flex flex-col items-center justify-center pt-20">
+          <h1 className="font-serif text-[18vw] leading-[0.8] tracking-tighter text-ivory mix-blend-overlay opacity-90 text-center uppercase pointer-events-none">
+            Purhami
           </h1>
-        </CinematicReveal>
+          <p className="font-sans text-xs md:text-sm tracking-[0.5em] uppercase text-chrome mt-12 mb-8">
+            The Architecture of Power
+          </p>
+          <button className="group flex items-center gap-4 text-xs tracking-[0.3em] uppercase font-bold text-ivory hover:text-bloodline transition-colors duration-500">
+            Enter The Bloodline 
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
+          </button>
+        </section>
 
-        <CinematicReveal delay={600}>
-           <div className="mt-12 flex flex-col md:flex-row gap-6 items-center">
-             <button className="px-8 py-4 bg-obsidian text-porcelain font-sans uppercase tracking-widest text-sm hover:bg-oxblood transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-oxblood">
-               Explore Collections
-             </button>
-           </div>
-        </CinematicReveal>
+        <section className="relative w-full mt-32 md:mt-64 z-20">
+          <div className="max-w-[1800px] mx-auto">
+            {CatalogSeed.map((product, idx) => (
+              <CinematicCard 
+                key={product.sku} 
+                product={product} 
+                index={idx} 
+                velocity={velocity} 
+              />
+            ))}
+          </div>
+        </section>
 
-      </section>
-
-      <section className="relative z-10 w-full min-h-[50vh] flex flex-col items-center justify-center px-6 py-24 bg-porcelain/50 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto text-center">
-          <CinematicReveal direction="up">
-            <p className="font-sans text-lg md:text-xl leading-relaxed text-obsidian/80 text-balance">
-              A world-class fashion house spanning accessories to essentials. 
-              The infrastructure is currently being aligned for the global debut.
-            </p>
-          </CinematicReveal>
-          
-          <CinematicReveal delay={200}>
-             <div className="w-px h-16 bg-oxblood/30 mx-auto mt-12" aria-hidden="true" />
-          </CinematicReveal>
-        </div>
-      </section>
-
+        <MonumentalFooter />
+      </div>
     </div>
   );
 }

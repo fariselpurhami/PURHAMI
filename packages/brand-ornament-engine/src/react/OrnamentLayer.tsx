@@ -4,14 +4,16 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { generateVeinSystem, SVGPathData } from '../core/branch-generator';
 import { mulberry32 } from '../core/math';
+import { OrnamentLayerProps } from '../types'; // استيراد الواجهة المحدثة
 
-interface OrnamentLayerProps {
-  seed?: number;
-  className?: string;
-  color?: string;
-}
-
-export function OrnamentLayer({ seed = 42, className = '', color = 'currentColor' }: OrnamentLayerProps) {
+export function OrnamentLayer({ 
+  seed = 42, 
+  className = '', 
+  color = 'currentColor',
+  density,      // الخاصية الجديدة
+  opacity = 0.5, // الخاصية الجديدة
+  edgeAnchor    // الخاصية الجديدة
+}: OrnamentLayerProps) {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,9 +38,7 @@ export function OrnamentLayer({ seed = 42, className = '', color = 'currentColor
       { rootMargin: '200px' } 
     );
     
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
+    if (containerRef.current) observer.observe(containerRef.current);
 
     return () => {
       window.removeEventListener('resize', debouncedResize);
@@ -53,12 +53,15 @@ export function OrnamentLayer({ seed = 42, className = '', color = 'currentColor
     const prng = mulberry32(seed);
     const { width, height } = dimensions;
     
+    // تحويل الـ density إلى منطق برمجيا للـ generator
+    const depthLimit = density === 'dense' ? 5 : density === 'sparse' ? 3 : 4;
+    
     const allPaths: SVGPathData[] = [];
     
-    const origins = [
-      { x: -50, y: height * 0.2, angle: 0.2 },
-      { x: width + 50, y: height * 0.8, angle: Math.PI + 0.2 },
-    ];
+    // منطق الـ edgeAnchor
+    const origins = [];
+    if (edgeAnchor === 'left' || edgeAnchor === 'both') origins.push({ x: -50, y: height * 0.2, angle: 0.2 });
+    if (edgeAnchor === 'right' || edgeAnchor === 'both') origins.push({ x: width + 50, y: height * 0.8, angle: Math.PI + 0.2 });
 
     origins.forEach(origin => {
       generateVeinSystem({
@@ -67,7 +70,7 @@ export function OrnamentLayer({ seed = 42, className = '', color = 'currentColor
         angle: origin.angle,
         length: Math.min(width, height) * 0.4,
         depth: 0,
-        maxDepth: 4,
+        maxDepth: depthLimit,
         width,
         height,
         seed
@@ -75,20 +78,14 @@ export function OrnamentLayer({ seed = 42, className = '', color = 'currentColor
     });
 
     return allPaths;
-  }, [dimensions, seed]);
+  }, [dimensions, seed, density, edgeAnchor]);
 
   if (dimensions.width === 0) return <div ref={containerRef} className={`absolute inset-0 pointer-events-none ${className}`} aria-hidden="true" />;
 
   return (
     <div ref={containerRef} className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`} aria-hidden="true">
       {isVisible && (
-        <svg 
-          width="100%" 
-          height="100%" 
-          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`} 
-          preserveAspectRatio="none"
-          className="w-full h-full"
-        >
+        <svg width="100%" height="100%" viewBox={`0 0 ${dimensions.width} ${dimensions.height}`} preserveAspectRatio="none">
           {paths.map((p, i) => (
             <path
               key={i}
@@ -96,7 +93,7 @@ export function OrnamentLayer({ seed = 42, className = '', color = 'currentColor
               fill="none"
               stroke={color}
               strokeWidth={p.strokeWidth}
-              strokeOpacity={p.opacity}
+              strokeOpacity={opacity} // استخدام خاصية opacity الممررة
               className="motion-safe:animate-draw-vein"
               style={{
                  strokeDasharray: 2000,

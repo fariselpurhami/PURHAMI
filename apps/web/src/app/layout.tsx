@@ -51,6 +51,7 @@ export default function RootLayout({
               color={colors.oxblood.DEFAULT} 
               opacity={0.08} 
               edgeAnchor="both" 
+	      respectReducedMotion={true}
             />
           </div>
           

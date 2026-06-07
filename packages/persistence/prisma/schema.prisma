@@ -1,0 +1,120 @@
+// packages/persistence/prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- IDENTITY DOMAIN ---
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  MERCHANDISER
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  salt         String
+  role         Role      @default(CUSTOMER)
+  firstName    String?
+  lastName     String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  sessions     Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  refreshToken String   @unique
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// --- COMMERCE DOMAIN (Read-Model Foundations) ---
+
+model Category {
+  id          String     @id @default(uuid())
+  slug        String     @unique
+  name        String
+  description String?
+  parentId    String?
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  products    Product[]  @relation("ProductCategories")
+
+  @@map("categories")
+}
+
+model Product {
+  id              String     @id @default(uuid())
+  slug            String     @unique
+  title           String
+  vendor          String     @default("PURHAMI")
+  descriptionHtml String
+  isActive        Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  categories      Category[] @relation("ProductCategories")
+  variants        Variant[]
+
+  @@map("products")
+}
+
+model Variant {
+  id                String   @id @default(uuid())
+  productId         String
+  sku               String   @unique
+  title             String
+  priceAmount       Int      // Stored in cents
+  currencyCode      String   @default("USD")
+  inventoryQuantity Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  options           Json     // e.g. {"Color": "Oxblood", "Size": "M"}
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("variants")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String?    @unique
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  variantId String
+  quantity  Int
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@map("cart_items")
+}

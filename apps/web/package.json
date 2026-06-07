@@ -13,28 +13,30 @@
     "test:e2e": "playwright test tests/e2e"
   },
   "dependencies": {
-    "next": "14.2.33",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "@purhami/api-client": "workspace:*",
-    "@purhami/design-tokens": "workspace:*",
-    "@purhami/design-system": "workspace:*",
     "@purhami/brand-ornament-engine": "workspace:*",
     "@purhami/config": "workspace:*",
     "@purhami/contracts": "workspace:*",
+    "@purhami/design-system": "workspace:*",
+    "@purhami/design-tokens": "workspace:*",
     "clsx": "^2.1.0",
+    "lucide-react": "^1.17.0",
+    "next": "14.2.33",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.41.0",
+    "@purhami/eslint-config": "workspace:*",
+    "@purhami/typescript-config": "workspace:*",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "typescript": "^5.4.0",
-    "tailwindcss": "^3.4.1",
+    "@types/webgl-ext": "^0.0.37",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
-    "@purhami/typescript-config": "workspace:*",
-    "@purhami/eslint-config": "workspace:*",
-    "@playwright/test": "^1.41.0"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.0"
   }
 }

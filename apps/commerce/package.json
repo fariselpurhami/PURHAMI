@@ -1,0 +1,30 @@
+{
+  "name": "@purhami/commerce",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts*\""
+  },
+  "dependencies": {
+    "@fastify/helmet": "^11.1.1",
+    "@purhami/config": "workspace:*",
+    "@purhami/contracts": "workspace:*",
+    "@purhami/domain": "workspace:*",
+    "@purhami/observability": "workspace:*",
+    "fastify": "^4.26.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@purhami/eslint-config": "workspace:*",
+    "@purhami/typescript-config": "workspace:*",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}

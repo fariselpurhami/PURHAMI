@@ -10,7 +10,6 @@ interface FetchOptions extends RequestInit {
 
 export async function executeCommerceFetch<T>(options: FetchOptions): Promise<Result<T>> {
   const correlationId = crypto.randomUUID();
-  // تحديث: إضافة Fallback للربط التلقائي بـ API Gateway في حالة عدم توفر المتغير
   const baseUrl = serverConfig.COMMERCE_API_URL || 'http://localhost:4000';
 
   if (!baseUrl) {
@@ -21,7 +20,6 @@ export async function executeCommerceFetch<T>(options: FetchOptions): Promise<Re
   }
 
   const url = `${baseUrl}${options.path}`;
-  const startTime = Date.now();
 
   try {
     const response = await fetch(url, {
@@ -34,9 +32,6 @@ export async function executeCommerceFetch<T>(options: FetchOptions): Promise<Re
       },
     });
 
-    const upstreamRequestLatencyMs = Date.now() - startTime;
-    // Note: In a full environment, upstreamRequestLatencyMs would route to an OpenTelemetry span here.
-
     if (response.status === 404) {
       return { success: false, error: { code: 'NOT_FOUND', message: 'Resource not found', correlationId } };
     }
@@ -46,7 +41,21 @@ export async function executeCommerceFetch<T>(options: FetchOptions): Promise<Re
     }
 
     const rawData = await response.json();
-    const parsed = options.schema.safeParse(rawData);
+    
+    console.log('\n================================================');
+    console.log(`🛑 RAW PAYLOAD FROM GATEWAY FOR: ${options.path}`);
+    console.log(JSON.stringify(rawData, null, 2));
+    console.log('================================================\n');
+
+    // -----------------------------------------------------------------
+    // 🚀 THE FIX: Intelligent Envelope Unwrapping
+    // استخراج البيانات من الغلاف إذا كانت موجودة لكي ينجح فحص الـ Zod
+    // -----------------------------------------------------------------
+    const payload = (rawData && typeof rawData === 'object' && 'data' in rawData) 
+      ? rawData.data 
+      : rawData;
+
+    const parsed = options.schema.safeParse(payload);
 
     if (!parsed.success) {
       console.error(`[API-CLIENT] Contract Mismatch on ${options.path} (ID: ${correlationId})`, parsed.error.format());

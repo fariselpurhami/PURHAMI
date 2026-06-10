@@ -78,7 +78,7 @@ model Product {
 
   categories      Category[] @relation("ProductCategories")
   variants        Variant[]
-
+  images          ProductImage[]
   @@map("products")
 }
 
@@ -117,4 +117,18 @@ model CartItem {
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
   @@map("cart_items")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  altText   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
 }

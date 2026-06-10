@@ -10,7 +10,8 @@ interface FetchOptions extends RequestInit {
 
 export async function executeCommerceFetch<T>(options: FetchOptions): Promise<Result<T>> {
   const correlationId = crypto.randomUUID();
-  const baseUrl = serverConfig.COMMERCE_API_URL;
+  // تحديث: إضافة Fallback للربط التلقائي بـ API Gateway في حالة عدم توفر المتغير
+  const baseUrl = serverConfig.COMMERCE_API_URL || 'http://localhost:4000';
 
   if (!baseUrl) {
     return {

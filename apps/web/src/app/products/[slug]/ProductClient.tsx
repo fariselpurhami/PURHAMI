@@ -27,11 +27,12 @@ export function ProductClient({ product }: { product: any }) {
         localStorage.setItem('purhami_cart_id', cartId);
       }
 
-      const variantId = product?.variants?.[0]?.id;
+      // 🌟 التعديل هنا: رجعناها product.id لأن الـ Commerce بيدور على المنتج الأول
+      const productId = product?.id;
 
-      if (variantId) {
-        // 🚀 استدعاء واحد فقط ونظيف للـ API
-        const result = await CartAPI.addItem(cartId, variantId, 1);
+      if (productId) {
+        // 🚀 بنبعت الـ Product ID الأصلي
+        const result = await CartAPI.addItem(cartId, productId, 1);
         
         if (result.success) {
           // إرسال إشارة التحديث للـ HUD
@@ -43,7 +44,7 @@ export function ProductClient({ product }: { product: any }) {
           console.error('Failed to add to cart:', result.error);
         }
       } else {
-        console.error('Visual Error: Product variant ID is missing');
+        console.error('Visual Error: Product ID is missing');
       }
     } catch (error) {
       console.error('Cart Error:', error);

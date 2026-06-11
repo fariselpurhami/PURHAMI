@@ -1,46 +1,72 @@
 // apps/commerce/src/infrastructure/persistence/postgres/PostgresCartRepo.ts
 import { PrismaClient } from '@prisma/client';
-import { ICartRepository } from '@purhami/domain';
+import { logger } from '@purhami/observability';
 
-export class PostgresCartRepo implements ICartRepository {
+export class PostgresCartRepo {
   constructor(private prisma: PrismaClient) {}
 
-  async findById(id: string): Promise<any | null> {
+  async findById(cartId: string): Promise<any | null> {
     const cartRecord = await this.prisma.cart.findUnique({
-      where: { id },
-      include: { items: true },
+      where: { id: cartId },
+      include: { items: true }
     });
     
     if (!cartRecord) return null;
-    return cartRecord;
+
+    return {
+      ...cartRecord,
+      addItem: function(item: any) {
+        if (!this.items) this.items = [];
+        this.items.push(item);
+      }
+    };
   }
 
   async save(cart: any): Promise<void> {
-    // استخراج الخصائص من كائن النطاق (Domain Entity)
-    const props = cart.getProps ? cart.getProps() : cart;
-    
-    // استخدام Transaction لضمان سلامة البيانات (ACID Compliance)
-    await this.prisma.$transaction(async (tx) => {
-      // 1. تحديث أو إنشاء السلة
-      await tx.cart.upsert({
-        where: { id: props.id },
-        update: { updatedAt: new Date() },
-        create: { id: props.id, userId: props.userId },
+    try {
+      const rawId = cart.id || cart.props?.id || cart.getProps?.()?.id;
+      const actualCartId = typeof rawId === 'object' ? rawId.value : String(rawId);
+
+      const rawItems = cart.items || cart.props?.items || cart.getProps?.()?.items || [];
+      
+      // 🚀 التطابق التام مع الـ Schema: إرسال المتغير والكمية فقط
+      const mappedItems = rawItems.map((item: any) => {
+        const itemProps = item.props || (typeof item.getProps === 'function' ? item.getProps() : item);
+        const itemId = item.id || itemProps.id || crypto.randomUUID();
+        
+        return {
+          id: typeof itemId === 'object' ? itemId.value : String(itemId),
+          variantId: itemProps.variantId,
+          quantity: itemProps.quantity
+          // تم إزالة السعر تماماً لاحترام التصميم المعماري لقاعدة البيانات
+        };
       });
 
-      // 2. مسح العناصر القديمة وإدخال الجديدة (طريقة الـ Sync السريعة للسلة)
-      await tx.cartItem.deleteMany({ where: { cartId: props.id } });
-      
-      if (props.items && props.items.length > 0) {
-        await tx.cartItem.createMany({
-          data: props.items.map((item: any) => ({
-            id: item.id || crypto.randomUUID(), // ضمان وجود ID
-            cartId: props.id,
-            variantId: item.variantId,
-            quantity: item.quantity,
-          })),
+      await this.prisma.$transaction(async (tx) => {
+        await tx.cart.upsert({
+          where: { id: actualCartId },
+          update: {},
+          create: { id: actualCartId }
         });
-      }
-    });
+
+        await tx.cartItem.deleteMany({
+          where: { cartId: actualCartId }
+        });
+
+        if (mappedItems.length > 0) {
+          await tx.cartItem.createMany({
+            data: mappedItems.map((mi: any) => ({
+              ...mi,
+              cartId: actualCartId
+            }))
+          });
+        }
+      });
+
+      logger.info({ cartId: actualCartId, itemsCount: mappedItems.length }, '✅ Cart successfully persisted to Postgres');
+    } catch (error) {
+      logger.error({ error }, '❌ Failed to save cart to Postgres');
+      throw error;
+    }
   }
 }

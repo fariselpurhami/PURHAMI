@@ -7,7 +7,7 @@ import { logger } from '@purhami/observability';
 import { authRoutes } from './presentation/http/routes/auth.routes';
 import { setupCorrelationHook } from './presentation/http/middleware/CorrelationHook';
 import { setupGlobalErrorHandler } from './presentation/http/middleware/GlobalErrorHandler';
-
+import { cartRoutes } from './presentation/http/routes/cart.routes';
 import { healthRoutes } from './presentation/http/routes/health.routes';
 import { catalogRoutes } from './presentation/http/routes/catalog.routes';
 import { navigationRoutes } from './presentation/http/routes/navigation.routes';
@@ -27,6 +27,8 @@ async function bootstrap() {
   // Hooks & Error Handling
   setupCorrelationHook(app);
   setupGlobalErrorHandler(app);
+
+  app.register(cartRoutes, { prefix: '/api/v1/carts' });
 
   // Route Registration
   app.register(healthRoutes, { prefix: '/health' });
